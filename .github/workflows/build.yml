@@ -1,0 +1,40 @@
+name: Build
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: 3.11
+      - name: Install poetry
+        run: pip install -q poetry==1.5.0
+      - name: Setup local virtual environment
+        run: |
+          poetry config virtualenvs.create true --local
+          poetry config virtualenvs.in-project true --local
+      - uses: actions/cache@v4
+        with:
+          path: ./.venv
+          key: venv-${{ hashFiles('poetry.lock') }}
+      - name: Install the project dependencies
+        run: poetry install -q
+      - name: Run the automated tests
+        env:
+          ADJUST_EMAIL: ${{ secrets.ADJUST_EMAIL }}
+          ADJUST_PASSWORD: ${{ secrets.ADJUST_PASSWORD }}
+        run: |
+          echo email=$ADJUST_EMAIL
+          echo password=$ADJUST_PASSWORD
+          poetry run pytest --cov=adjust --cov-report xml:coverage.xml -vv
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./coverage.xml
