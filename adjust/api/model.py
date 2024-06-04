@@ -216,6 +216,17 @@ class Callback(BaseModel):
     custom: bool
     token: str | None
 
+    @classmethod
+    def empty_callback_for_trigger(cls, trigger: CallbackType | int) -> Callback:
+        return cls(
+            id=trigger,
+            type=trigger,
+            name=trigger,
+            urls=[],
+            custom=isinstance(trigger, int),
+            token=None,
+        )
+
     @property
     def url(self) -> str | None:
         return " ".join(u.url for u in self.urls) if self.urls else None

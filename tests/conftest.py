@@ -165,6 +165,7 @@ def snapshot_modify_help() -> HelpOutput:
             HelpOption(names=["--matching-domain REGEX"], help="Only modify callbacks whose URL domain matches"),
             HelpOption(names=["--matching-path REGEX"], help="Only modify callbacks whose URL matches REGEX"),
             HelpOption(names=["-a", "--add-placeholder PH"], help="Add placeholder PH to all matching callbacks"),
+            HelpOption(names=["--add-standard-callbacks"], help="Add standard callbacks to all matching apps"),
             HelpOption(names=["-n", "--dry-run"], help="Do not update the snapshot, only simulate what"),
             HelpOption(names=["--help"], help="Show this message and exit."),
         ],

@@ -6,6 +6,7 @@ import shutil
 
 from click_help_colors import HelpColorsGroup
 
+from adjust.api.model import Callback, CallbackType, CallbackURL
 from adjust.snapshot import (
     snapshot_callback_count,
     snapshot_diff,
@@ -18,7 +19,7 @@ from adjust.snapshot import (
 
 from ..api import AdjustAPI
 from ..utils import AddCounters
-from .types import REGEX
+from .types import CALLBACK_URL, REGEX
 
 
 pass_api = click.make_pass_decorator(AdjustAPI)
@@ -90,6 +91,38 @@ def restore(api: AdjustAPI, snapshot_path: str, dry_run: bool) -> None:
     click.echo(f"✅ Done. {'Would have updated' if dry_run else 'Updated'} {num_callbacks} callbacks.")
 
 
+# Triggers used currently by our games (and their frequencies) are:
+#   46 install
+#   43 attribution_update
+#   42 sk_install
+#   37 reattribution
+#   32 click
+#   29 impression
+#   25 rejected_reattribution
+#   25 rejected_install
+#   23 sk_event
+#    9 sk_qualifier           <-- Setting a threshold, standard triggers above this line
+#    3 sk_install_direct
+#    3 sk_cv_update
+#    3 session
+#    1 uninstall
+#    1 subscription
+#    1 reinstall
+#    1 global
+#    1 cost_update
+#    1 att_consent
+#    1 ad revenue
+_STANDARD_TRIGGERS: list[CallbackType] = [
+    "install", "attribution_update", "sk_install", "reattribution",
+    "click", "impression", "rejected_reattribution", "rejected_install",
+    "sk_event",
+    # These callbacks are used only on a few games, therefore, we don't
+    # consider them standard triggers yet
+    # "sk_qualifier", "sk_install_direct", "sk_cv_update", "session",
+    # "uninstall", "subscription", "reinstall", "global", "cost_update",
+    # "att_consent", "ad_revenue",
+]
+
 @snapshot.command(help="Modify local snapshot")
 @click.option(
     "--snapshot",
@@ -110,6 +143,7 @@ def restore(api: AdjustAPI, snapshot_path: str, dry_run: bool) -> None:
 @click.option("--matching-domain", multiple=True, type=REGEX, help="Only modify callbacks whose URL domain matches REGEX")
 @click.option("--matching-path", multiple=True, type=REGEX, help="Only modify callbacks whose URL matches REGEX")
 @click.option("--add-placeholder", "-a", multiple=True, metavar="PH", help="Add placeholder PH to all matching callbacks")
+@click.option("--add-standard-callbacks", type=CALLBACK_URL, help="Add standard callbacks to all matching apps using base URL")
 @click.option("--dry-run", "-n", is_flag=True, help="Do not update the snapshot, only simulate what would be done.")
 @pass_api
 def modify(
@@ -125,6 +159,7 @@ def modify(
     matching_domain: list[re.Pattern],
     matching_path: list[re.Pattern],
     add_placeholder: list[str],
+    add_standard_callbacks: CallbackURL,
     dry_run: bool,
 ) -> None:
     counters = AddCounters()
@@ -138,6 +173,11 @@ def modify(
             continue
         if matching_app and not any(regex.match(app_name) for regex in matching_app):
             continue
+        if add_standard_callbacks:
+            for trigger in _STANDARD_TRIGGERS:
+                if not any(c.id == trigger for c in callbacks):
+                    callback = Callback.empty_callback_for_trigger(trigger)
+                    callbacks.append(callback)
         for callback in callbacks:
             modified = False
             for url in callback.urls:
@@ -157,6 +197,13 @@ def modify(
                     url.add_placeholder(ph)
                     counters.urls += 1
                     modified = True
+            if add_standard_callbacks and not any(u.netloc != add_standard_callbacks.netloc for u in callback.urls):
+                url = add_standard_callbacks.copy()
+                for placeholder in api.placeholders:
+                    url.add_placeholder(f"{placeholder.category}_{placeholder.placeholder}")
+                callback.urls.append(add_standard_callbacks)
+                counters.urls += 1
+                modified = True
             if modified:
                 counters.apps_seen.add(app_token)
                 counters.callbacks += 1
