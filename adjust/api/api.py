@@ -79,6 +79,13 @@ class AdjustAPI(object):
         self._log_in_if_needed()
         url = "https://api.adjust.com/" + path
         headers = dict(Accept="application/json")
+
+        # If logging in, add the authorization token to the headers
+        if path == "accounts/users/sign_in":
+            token = data['user']['password']
+            headers["Authorization"] = f"Token token={token}"
+            data = None
+        
         if not data:
             r = self._session.get(url, headers=headers)
         elif method == "PUT":
