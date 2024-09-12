@@ -66,7 +66,7 @@ class AdjustAPI(object):
             self._logged_in = True
             self._log_in()
 
-     def _api(self, type: Type[T], path: str, method: str = "GET", **data: Any) -> T:
+    def _api(self, type: Type[T], path: str, method: str = "GET", **data: Any) -> T:
         """Internal method used to emit low-level API calls.
 
         Args:
