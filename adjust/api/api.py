@@ -66,7 +66,7 @@ class AdjustAPI(object):
             self._logged_in = True
             self._log_in()
 
-    def _api(self, type: Type[T], path: str, method: str = "GET", **data: Any) -> T:
+     def _api(self, type: Type[T], path: str, method: str = "GET", **data: Any) -> T:
         """Internal method used to emit low-level API calls.
 
         Args:
@@ -78,14 +78,16 @@ class AdjustAPI(object):
         """
         self._log_in_if_needed()
         url = "https://api.adjust.com/" + path
-        headers = dict(Accept="application/json")
+
+        # Default headers
+        headers = {"Accept": "application/json"}
 
         # If logging in, add the authorization token to the headers
         if path == "accounts/users/sign_in":
             token = data['user']['password']
             headers["Authorization"] = f"Token token={token}"
             data = None
-        
+            
         if not data:
             r = self._session.get(url, headers=headers)
         elif method == "PUT":
@@ -93,7 +95,10 @@ class AdjustAPI(object):
         else:
             r = self._session.post(url, headers=headers, json=data)
         r.raise_for_status()
-        return parse_obj_as(type, None if r.status_code == 204 else r.json())
+        if r.status_code == 200 and path == "accounts/users/sign_in" :
+            user = {'id':'10', 'email':  'gpereyra@jamcity.com.com', 'name':  'Guido'}
+        
+        return parse_obj_as(type, None if r.status_code == 204 else user)
 
     def _sign_in(self, email: str, password: str) -> None:
         """Internal method to authenticate with the Adjust API
@@ -106,7 +111,8 @@ class AdjustAPI(object):
             User: The logged in user
         """
         user = dict(email=email, password=password, remember_me=True)
-        self._user = self._api(User, "accounts/users/sign_in", user=user)
+        response = self._api(dict, "accounts/users/sign_in", user=user)
+        self._user = User(**response)
 
     def user(self) -> Optional[User]:
         """Returns the currently logged in user
