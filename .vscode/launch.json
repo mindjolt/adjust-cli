@@ -23,5 +23,21 @@
             ],
             "console": "integratedTerminal",
         },
+        {
+            "name": "CLI: add standard callbacks",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "adjust.cli",
+            "cwd": "/Users/jlopez/IdeaProjects/adjust-placeholders",
+            "args": [
+                "snapshot",
+                "modify",
+                "--matching-app",
+                "cats.*dogs",
+                "--add-standard-callbacks",
+                "https://invenio.sgn.com/v1/adjust/panda-pop?_google_cd=xxxx&_itunes_cd=yyyy&app_token=zzzz",
+            ],
+            "console": "integratedTerminal",
+        },
     ]
 }
