@@ -25,6 +25,14 @@ jobs:
           key: venv-${{ hashFiles('poetry.lock') }}
       - name: Install the project dependencies
         run: poetry install -q
+      - name: Run the automated tests
+        env:
+          ADJUST_EMAIL: ${{ secrets.ADJUST_EMAIL }}
+          ADJUST_PASSWORD: ${{ secrets.ADJUST_PASSWORD }}
+        run: |
+          echo email=$ADJUST_EMAIL
+          echo password=$ADJUST_PASSWORD
+          poetry run pytest --cov=adjust --cov-report xml:coverage.xml -vv
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v4
         with:
