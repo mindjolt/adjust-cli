@@ -2,10 +2,9 @@ from __future__ import annotations
 
 import bisect
 from datetime import date, datetime
-from typing import Literal, Type, TypeVar
+from typing import Literal, Type, TypeVar, Optional
 from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 from pydantic import BaseModel, Extra, Field
-
 
 class PlaceholderType(BaseModel):
     label: str
@@ -306,28 +305,31 @@ class EventsResponse(BaseModel):
 
 
 class User(BaseModel):
-    id: int
-    email: str
-    name: str | None
-    main_account_id: int
-    main_account_type: str
-    created_by: str | None
-    created_at: datetime
-    updated_at: datetime
-    authentication_token: str
-    locale: str  # 'en'
-    uses_next: bool
-    api_access: None
-    first_name: str
-    last_name: str
-    super_admin: bool
-    salesforce_sync_failed: bool
-    ct_role: None
-    timezone_id: int
-    uses_dash: bool
-    sso: bool
-    direct_otp: None
-    direct_otp_sent_at: None
-    encrypted_otp_secret_key: None
-    encrypted_otp_secret_key_iv: None
-    encrypted_otp_secret_key_salt: None
+    id: Optional[int] = None
+    email: Optional[str] = None
+    name: Optional[str] = None
+    main_account_id: Optional[int] = None
+    main_account_type: Optional[str] = None
+    created_by: Optional[str] = None
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
+    authentication_token: Optional[str] = None
+    locale: Optional[str] = None  # 'en'
+    uses_next: Optional[bool] = None
+    api_access: Optional[None] = None
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+    super_admin: Optional[bool] = None
+    salesforce_sync_failed: Optional[bool] = None
+    ct_role: Optional[None] = None
+    timezone_id: Optional[int] = None
+    uses_dash: Optional[bool] = None
+    sso: Optional[bool] = None
+    direct_otp: Optional[None] = None
+    direct_otp_sent_at: Optional[None] = None
+    encrypted_otp_secret_key: Optional[None] = None
+    encrypted_otp_secret_key_iv: Optional[None] = None
+    encrypted_otp_secret_key_salt: Optional[None] = None
+
+
+User.update_forward_refs()
