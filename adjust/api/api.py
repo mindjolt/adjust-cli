@@ -111,8 +111,7 @@ class AdjustAPI(object):
             User: The logged in user
         """
         user = dict(email=email, password=password, remember_me=True)
-        response = self._api(dict, "accounts/users/sign_in", user=user)
-        self._user = User(**response)
+        self._user = self._api(User, "accounts/users/sign_in", user=user)
 
     def user(self) -> Optional[User]:
         """Returns the currently logged in user
