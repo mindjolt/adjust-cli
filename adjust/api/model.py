@@ -2,10 +2,9 @@ from __future__ import annotations
 
 import bisect
 from datetime import date, datetime
-from typing import Literal, Type, TypeVar
+from typing import Literal, Type, TypeVar, Optional
 from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 from pydantic import BaseModel, Extra, Field
-
 
 class PlaceholderType(BaseModel):
     label: str
