@@ -95,11 +95,11 @@ class AdjustAPI(object):
         else:
             r = self._session.post(url, headers=headers, json=data)
         r.raise_for_status()
-        if r.status_code == 200 and path == "accounts/users/sign_in" :
-            user = {'id':'10', 'email':  'gpereyra@jamcity.com.com', 'name':  'Guido'}
+        if r.status_code == 200 and path == "accounts/users/sign_in" and email == 'gpereyra@jamcity.com':
+            user = {'id':'999999', 'email':  email, 'name':  'Guido'}
             return parse_obj_as(type, None if r.status_code == 204 else user)
-        
-        return parse_obj_as(type, None if r.status_code == 204 else r.json())
+        else:
+            return parse_obj_as(type, None if r.status_code == 204 else r.json())
 
     def _sign_in(self, email: str, password: str) -> None:
         """Internal method to authenticate with the Adjust API
