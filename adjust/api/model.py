@@ -331,3 +331,6 @@ class User(BaseModel):
     encrypted_otp_secret_key: Optional[None] = None
     encrypted_otp_secret_key_iv: Optional[None] = None
     encrypted_otp_secret_key_salt: Optional[None] = None
+
+
+User.update_forward_refs()
