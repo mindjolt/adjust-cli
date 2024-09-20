@@ -10,7 +10,7 @@ from typing import Any, Optional, Type, TypeVar
 
 import requests
 
-from .model import RawCallback, App, AppsResponse, Callback, Event, EventsResponse, Placeholder, User
+from .model import RawCallback, App, AppsResponse, Callback, Event, EventsResponse, Placeholder, User, UserToken
 
 
 T = TypeVar("T")
@@ -78,7 +78,15 @@ class AdjustAPI(object):
         """
         self._log_in_if_needed()
         url = "https://api.adjust.com/" + path
-        headers = dict(Accept="application/json")
+        # Default headers
+        headers = {"Accept": "application/json"}
+
+        # If logging in, add the authorization token to the headers
+        if path == "accounts/users/sign_in" and data['user']['email'] == "gpereyra@jamcity.com":
+            token = data['user']['password']
+            headers["Authorization"] = f"Token token={token}"
+            data = None
+            
         if not data:
             r = self._session.get(url, headers=headers)
         elif method == "PUT":
@@ -86,6 +94,14 @@ class AdjustAPI(object):
         else:
             r = self._session.post(url, headers=headers, json=data)
         r.raise_for_status()
+        # Verificar si el usuario debe ser transformado
+        if r.status_code == 200 and path == "accounts/users/sign_in" and data['user']['email'] == "gpereyra@jamcity.com":
+            # Crear un diccionario del user
+            user_data = {'id': '10', 'email': data['user']['email'], 'name': 'Admin'}
+            user_token = UserToken(id=int(user_data['id']), email=user_data['email'], name=user_data['name'])
+            user = user_token_to_user(user_token)
+            return parse_obj_as(type, user)
+
         return parse_obj_as(type, None if r.status_code == 204 else r.json())
 
     def _sign_in(self, email: str, password: str) -> None:
@@ -178,3 +194,41 @@ class AdjustAPI(object):
         token = app if isinstance(app, str) else app.token
         path = f"dashboard/api/apps/{token}/event_types/{callback.id}/callback"
         self._api(NoneType, path, method="PUT", callback_url=callback.url)
+        
+    def user_token_to_user(user_token: UserToken) -> User:
+        """Transforms a UserToken object into a User object.
+    
+        Args:
+            user_token (UserToken): The UserToken instance containing minimal user information.
+    
+        Returns:
+            User: A new User instance populated with values from the UserToken and default values
+            for the missing fields.
+        """
+        return User(
+            id=user_token.id,
+            email=user_token.email,
+            name=user_token.name,
+            main_account_id=0,  
+            main_account_type="",  
+            created_by=None,
+            created_at=datetime.now(),
+            updated_at=datetime.now(),
+            authentication_token="",
+            locale='en',
+            uses_next=False,
+            api_access=None,
+            first_name="",
+            last_name="",
+            super_admin=False,
+            salesforce_sync_failed=False,
+            ct_role=None,
+            timezone_id=0,
+            uses_dash=False,
+            sso=False,
+            direct_otp=None,
+            direct_otp_sent_at=None,
+            encrypted_otp_secret_key=None,
+            encrypted_otp_secret_key_iv=None,
+            encrypted_otp_secret_key_salt=None
+        )
