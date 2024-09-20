@@ -331,3 +331,8 @@ class User(BaseModel):
     encrypted_otp_secret_key: None
     encrypted_otp_secret_key_iv: None
     encrypted_otp_secret_key_salt: None
+
+class UserToken(BaseModel):
+    id: int
+    email: str
+    name: str | None
