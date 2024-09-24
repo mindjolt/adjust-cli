@@ -12,7 +12,6 @@ import requests
 
 from .model import RawCallback, App, AppsResponse, Callback, Event, EventsResponse, Placeholder, User, UserToken
 
-
 T = TypeVar("T")
 
 
@@ -102,7 +101,7 @@ class AdjustAPI(object):
             # Crear un diccionario del user
             user_data = {'id': '10', 'email': userEmail, 'name': 'Admin'}
             user_token = UserToken(id=int(user_data['id']), email=user_data['email'], name=user_data['name'])
-            user = user_token_to_user(user_token)
+            user = self._user_token_to_user(user_token)
             return parse_obj_as(type, user)
 
         return parse_obj_as(type, None if r.status_code == 204 else r.json())
@@ -198,7 +197,7 @@ class AdjustAPI(object):
         path = f"dashboard/api/apps/{token}/event_types/{callback.id}/callback"
         self._api(NoneType, path, method="PUT", callback_url=callback.url)
         
-    def user_token_to_user(user_token: UserToken) -> User:
+    def _user_token_to_user(user_token: UserToken) -> User:
         """Transforms a UserToken object into a User object.
     
         Args:
