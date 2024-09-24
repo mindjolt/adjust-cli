@@ -197,7 +197,7 @@ class AdjustAPI(object):
         path = f"dashboard/api/apps/{token}/event_types/{callback.id}/callback"
         self._api(NoneType, path, method="PUT", callback_url=callback.url)
         
-    def _user_token_to_user(user_token: UserToken) -> User:
+    def _user_token_to_user(self, user_token: UserToken) -> User:
         """Transforms a UserToken object into a User object.
     
         Args:
