@@ -80,6 +80,8 @@ class AdjustAPI(object):
         url = "https://api.adjust.com/" + path
         # Default headers
         headers = {"Accept": "application/json"}
+        userEmail = ""
+        token = ""
 
         # If logging in, add the authorization token to the headers
         if path == "accounts/users/sign_in" and data['user']['email'] == "gpereyra@jamcity.com":
