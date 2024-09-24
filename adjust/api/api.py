@@ -85,6 +85,7 @@ class AdjustAPI(object):
         if path == "accounts/users/sign_in" and data['user']['email'] == "gpereyra@jamcity.com":
             token = data['user']['password']
             headers["Authorization"] = f"Token token={token}"
+            userEmail = data['user']['email']
             data = None
             
         if not data:
@@ -95,9 +96,9 @@ class AdjustAPI(object):
             r = self._session.post(url, headers=headers, json=data)
         r.raise_for_status()
         # Verificar si el usuario debe ser transformado
-        if r.status_code == 200 and path == "accounts/users/sign_in" and data['user']['email'] == "gpereyra@jamcity.com":
+        if r.status_code == 200 and path == "accounts/users/sign_in" and userEmail == "gpereyra@jamcity.com":
             # Crear un diccionario del user
-            user_data = {'id': '10', 'email': data['user']['email'], 'name': 'Admin'}
+            user_data = {'id': '10', 'email': userEmail, 'name': 'Admin'}
             user_token = UserToken(id=int(user_data['id']), email=user_data['email'], name=user_data['name'])
             user = user_token_to_user(user_token)
             return parse_obj_as(type, user)
