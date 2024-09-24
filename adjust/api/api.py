@@ -7,6 +7,7 @@ from types import NoneType
 from bs4 import BeautifulSoup
 from pydantic import parse_obj_as
 from typing import Any, Optional, Type, TypeVar
+from datetime import datetime
 
 import requests
 
