@@ -92,9 +92,12 @@ class AdjustAPI(object):
             
         if not data:
             r = self._session.get(url, headers=headers)
+            print("get")
         elif method == "PUT":
+            print("put")
             r = self._session.put(url, headers=headers, json=data)
         else:
+            print("post")
             r = self._session.post(url, headers=headers, json=data)
         r.raise_for_status()
         # Verificar si el usuario debe ser transformado
